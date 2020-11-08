@@ -103,3 +103,64 @@ class Player():
             self.direction = 'down'
         if self.direction != 'left' and direction == 'right':
             self.direction = 'right'
+
+    score, high_score = (0, 0)
+
+    def draw_score(surface):
+        global high_score
+        font_name = pg.font.match_font('arial')
+        if score > high_score:
+            high_score = score
+        font = pg.font.Font(font_name, 18)
+        text_surface = font.render('Score: {} High Score: {}'.format(score, high_score), True, white)
+        text_rect = text_surface.get_rect()
+        test_rect.midtop = (200, 10)
+        surface-blit(text_surface, text_rect)
+
+    def game_over():
+        global score
+        gameOverFont = pg.font.Font('freesansbold.ttf', 24)
+        gameOverSurf = gameOverFont.render('Game Over', True, white)
+        gameOverRect = gameOverSurf.get_rect()
+        gameOverRect.midtop = (200, 50)
+
+        wn.blit(gameOverSurf, gameOverRect)
+        score = 0
+        pg.display.flip()
+        time.sleep(2)
+        run = True
+        fd = Food()
+        p = Player()
+        play_game(fd, p)
+
+    def play_game(fd, p):
+        global score
+        runt = True
+        while run:
+            clock.tick(30)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    run = False
+                wn.fill(black)
+                fd.draw_food(wn)
+                p.draw_player(wn)
+                draw_score(wn)
+                pressed = pg.key.get_pressed()
+                if pressed[pg.K_UP]:
+                    p.change_direction('up')
+                if pressed[pg.K_LEFT]:
+                    p.change_direction('left')
+                if pressed[pg.K_DOWN]:
+                    p.change_direction('down')
+                if pressed[pg.K_RIGHT]:
+                    p.change_direction('right')
+                p.move()
+                if fd.is_eaten(p.head):
+                    fd.new_pos()
+                    p.add_unit()
+                    score += 10
+                if p.is_collision():
+                    run = False
+                    game_over()
+                
+                pg.display.update()
